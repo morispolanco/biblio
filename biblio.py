@@ -2,29 +2,30 @@ import streamlit as st
 import requests
 
 # Cargar la clave de API desde los secrets de Streamlit
-serply_api_key = st.secrets["serply_api_key"]
+serper_api_key = st.secrets["serper_api_key"]
 
-# Función para hacer la solicitud a la API de Serply
-def fetch_bibliography_serply(query):
-    url = f"https://api.serply.io/v1/scholar/{query.replace(' ', '+')}"
+# Función para hacer la solicitud a la API de Serper
+def fetch_bibliography_serper(query):
+    url = "https://google.serper.dev/search"
     headers = {
-        "Content-Type": "application/json",
-        "X-Api-Key": serply_api_key
+        "X-API-KEY": serper_api_key,
+        "Content-Type": "application/json"
+    }
+    data = {
+        "q": query
     }
     
-    response = requests.get(url, headers=headers)
+    response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 200:
         result = response.json()
         # Extraer los primeros resultados si están disponibles
-        if 'results' in result:
-            return result['results'][:5]  # Limitar a los primeros 5 resultados
+        if 'organic' in result:
+            return result['organic'][:5]  # Limitar a los primeros 5 resultados
         else:
             return "No se encontraron resultados."
-    elif response.status_code == 401:
-        return "Error 401: No se pudo conectar a la API de Serply. Verifica tu clave de API."
     else:
-        return f"Error {response.status_code}: No se pudo conectar a la API de Serply."
+        return f"Error {response.status_code}: No se pudo conectar a la API de Serper."
 
 # Título de la aplicación
 st.title("Búsqueda de Bibliografía Académica")
@@ -35,16 +36,16 @@ user_query = st.text_input("Introduce el tema que deseas buscar:")
 # Botón para iniciar la búsqueda
 if st.button("Buscar"):
     if user_query:
-        st.subheader("Resultados de Serply:")
-        serply_results = fetch_bibliography_serply(user_query)
+        st.subheader("Resultados de Serper:")
+        serper_results = fetch_bibliography_serper(user_query)
         
-        if isinstance(serply_results, list):
-            for idx, result in enumerate(serply_results):
+        if isinstance(serper_results, list):
+            for idx, result in enumerate(serper_results):
                 st.write(f"**{idx+1}. {result['title']}**")
                 st.write(f"Enlace: {result['link']}")
                 st.write(f"Resumen: {result['snippet']}")
                 st.write("------")
         else:
-            st.write(serply_results)
+            st.write(serper_results)
     else:
         st.warning("Por favor, introduce un tema para buscar.")
