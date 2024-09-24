@@ -11,7 +11,7 @@ def fetch_bibliography_serply(query):
         "Content-Type": "application/json",
         "X-Api-Key": serply_api_key
     }
-     
+    
     response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
@@ -21,6 +21,8 @@ def fetch_bibliography_serply(query):
             return result['results'][:5]  # Limitar a los primeros 5 resultados
         else:
             return "No se encontraron resultados."
+    elif response.status_code == 401:
+        return "Error 401: No se pudo conectar a la API de Serply. Verifica tu clave de API."
     else:
         return f"Error {response.status_code}: No se pudo conectar a la API de Serply."
 
