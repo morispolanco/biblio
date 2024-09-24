@@ -11,7 +11,7 @@ def fetch_bibliography_serply(query):
         "Content-Type": "application/json",
         "X-Api-Key": serply_api_key
     }
-    
+     
     response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
