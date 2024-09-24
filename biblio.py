@@ -1,57 +1,31 @@
 import streamlit as st
 import requests
-import json
 
-# Cargar las claves de API desde los secrets de Streamlit
-together_api_key = st.secrets["together_api_key"]
-serper_api_key = st.secrets["serper_api_key"]
+# Cargar la clave de API desde los secrets de Streamlit
+serply_api_key = st.secrets["serply_api_key"]
 
-# Función para hacer la solicitud a la API de Together
-def fetch_bibliography_together(query):
-    url = "https://api.together.xyz/v1/chat/completions"
+# Función para hacer la solicitud a la API de Serply
+def fetch_bibliography_serply(query):
+    url = f"https://api.serply.io/v1/scholar/q={query.replace(' ', '+')}"
     headers = {
-        "Authorization": f"Bearer {together_api_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Api-Key": serply_api_key
     }
-    data = {
-        "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        "messages": [{"role": "user", "content": query}],
-        "max_tokens": 2512,
-        "temperature": 0.7,
-        "top_p": 0.7,
-        "top_k": 50,
-        "repetition_penalty": 1,
-        "stop": ["<|eot_id|>"],
-        "stream": False
-    }
-    response = requests.post(url, headers=headers, json=data)
+    
+    response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
         result = response.json()
-        return result['choices'][0]['message']['content']
+        # Extraer los primeros resultados si están disponibles
+        if 'results' in result:
+            return result['results'][:5]  # Limitar a los primeros 5 resultados
+        else:
+            return "No se encontraron resultados."
     else:
-        return "Error al obtener respuesta de la API de Together"
-
-# Función para hacer la solicitud a la API de Serper
-def fetch_bibliography_serper(query):
-    url = "https://google.serper.dev/search"
-    headers = {
-        "X-API-KEY": serper_api_key,
-        "Content-Type": "application/json"
-    }
-    data = {
-        "q": query
-    }
-    response = requests.post(url, headers=headers, json=data)
-    
-    if response.status_code == 200:
-        result = response.json()
-        return result['organic'][0]['snippet']
-    else:
-        return "Error al obtener respuesta de la API de Serper"
+        return f"Error {response.status_code}: No se pudo conectar a la API de Serply."
 
 # Título de la aplicación
-st.title("Búsqueda de Bibliografía")
+st.title("Búsqueda de Bibliografía Académica")
 
 # Entrada del usuario
 user_query = st.text_input("Introduce el tema que deseas buscar:")
@@ -59,14 +33,16 @@ user_query = st.text_input("Introduce el tema que deseas buscar:")
 # Botón para iniciar la búsqueda
 if st.button("Buscar"):
     if user_query:
-        # Buscar bibliografía con Together
-        st.subheader("Resultados de Together:")
-        together_result = fetch_bibliography_together(user_query)
-        st.write(together_result)
-
-        # Buscar bibliografía con Serper
-        st.subheader("Resultados de Serper:")
-        serper_result = fetch_bibliography_serper(user_query)
-        st.write(serper_result)
+        st.subheader("Resultados de Serply:")
+        serply_results = fetch_bibliography_serply(user_query)
+        
+        if isinstance(serply_results, list):
+            for idx, result in enumerate(serply_results):
+                st.write(f"**{idx+1}. {result['title']}**")
+                st.write(f"Enlace: {result['link']}")
+                st.write(f"Resumen: {result['snippet']}")
+                st.write("------")
+        else:
+            st.write(serply_results)
     else:
         st.warning("Por favor, introduce un tema para buscar.")
