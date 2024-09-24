@@ -14,14 +14,14 @@ def fetch_bibliography_serper(query):
     data = {
         "q": query
     }
-     
+    
     response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 200:
         result = response.json()
-        # Extraer los primeros resultados si están disponibles
+        # Extraer los primeros 15 resultados si están disponibles
         if 'organic' in result:
-            return result['organic'][:5]  # Limitar a los primeros 15 resultados
+            return result['organic'][:15]  # Limitar a los primeros 15 resultados
         else:
             return "No se encontraron resultados."
     else:
