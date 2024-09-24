@@ -14,7 +14,7 @@ def fetch_bibliography_serper(query):
     data = {
         "q": query
     }
-    
+     
     response = requests.post(url, headers=headers, json=data)
     
     if response.status_code == 200:
