@@ -6,7 +6,7 @@ serply_api_key = st.secrets["serply_api_key"]
 
 # Función para hacer la solicitud a la API de Serply
 def fetch_bibliography_serply(query):
-    url = f"https://api.serply.io/v1/scholar/q={query.replace(' ', '+')}"
+    url = f"https://api.serply.io/v1/scholar/{query.replace(' ', '+')}"
     headers = {
         "Content-Type": "application/json",
         "X-Api-Key": serply_api_key
